@@ -6,10 +6,13 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+
+import java.util.ArrayList;
 
 public class GameplayScreen implements Screen {
 
@@ -25,6 +28,15 @@ public class GameplayScreen implements Screen {
     //control how the camera views the world
     //zoom in/out? Keep everything scaled?
     private Viewport viewport;
+
+    ArrayList<Animal> animals;
+
+    private boolean racing = true;
+
+    private BitmapFont defaultFont = new BitmapFont();
+
+
+
 
     /*
      * runs one time, at the very beginning
@@ -50,6 +62,13 @@ public class GameplayScreen implements Screen {
 
         //????, I just know that this was the solution to an annoying problem I had
         shapeRenderer.setAutoShapeType(true);
+
+        animals = new ArrayList<>();
+        animals.add(new Animal(0,0));
+        animals.add(new Turtle(0,80));
+        animals.add(new SnappingTurtle(0,160));
+        animals.add(new Cheeta(0,240));
+
     }
 
     /*
@@ -67,18 +86,45 @@ public class GameplayScreen implements Screen {
         //User Input
 
         //A.I.
+        int count = 0;
+        if (racing) {
+
+            String winner = "";
+
+            for (Animal animal : animals) {
+                animal.act();
+                if (animal.getX() > 1200) {
+                    count++;
+                    winner += animal.getName();
+
+                }
+            }
+        }
+
+
+
+
 
         //all drawing of shapes MUST go between begin/end
         shapeRenderer.begin();
+
+        shapeRenderer.rect(550,0,25,450);
+
         shapeRenderer.end();
 
         //all drawing of graphic MUST go between being/end
         spriteBatch.begin();
+
+        for(Animal animal : animals){
+            animal.draw(spriteBatch);
+        }
+
+
         spriteBatch.end();
     }
 
     public void clearScreen() {
-        Gdx.gl.glClearColor(1,0,0,1);
+        Gdx.gl.glClearColor(0,0,0,1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
     }
 
