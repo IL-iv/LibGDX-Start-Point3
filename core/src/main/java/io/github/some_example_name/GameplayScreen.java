@@ -35,9 +35,11 @@ public class GameplayScreen implements Screen {
 
     private BitmapFont defaultFont = new BitmapFont();
 
+    private String winner = "";
 
+    private double endTime;
 
-
+    private double startTime = System.currentTimeMillis();
     /*
      * runs one time, at the very beginning
      * all setup should happen here
@@ -87,33 +89,37 @@ public class GameplayScreen implements Screen {
 
         //A.I.
         int count = 0;
+
         if (racing) {
-
-            String winner = "";
-
             for (Animal animal : animals) {
                 animal.act();
-                if (animal.getX() > 1200) {
+                if (animal.getX() > 550) { // + animal.getSize()
                     count++;
-                    winner += animal.getName();
-
+                    winner = animal.getName();
                 }
             }
         }
 
-
-
+        if(count > 0){
+            racing = false;
+            endTime = System.currentTimeMillis();
+        }
 
 
         //all drawing of shapes MUST go between begin/end
-        shapeRenderer.begin();
-
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.rect(550,0,25,450);
-
         shapeRenderer.end();
 
         //all drawing of graphic MUST go between being/end
         spriteBatch.begin();
+        if(!racing){
+            defaultFont.draw(spriteBatch, "Winner: " + winner, 300, 300);
+            defaultFont.draw(spriteBatch, "Time: " + ((endTime-startTime)/1000.0) + " seconds", 200, 200);
+        }
+
+        defaultFont.draw(spriteBatch, "Time: " + ((System.currentTimeMillis() - startTime) / 1000), 400, 400);
+
 
         for(Animal animal : animals){
             animal.draw(spriteBatch);

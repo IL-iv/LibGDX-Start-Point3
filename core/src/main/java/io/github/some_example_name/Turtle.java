@@ -14,8 +14,8 @@ public class Turtle extends Animal{
 
     @Override
     public void act(){
-        x += 0.1f;
-
+        //x += 0.1f;
+        x += 20;
     }
 
 
