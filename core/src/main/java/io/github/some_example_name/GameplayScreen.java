@@ -2,12 +2,14 @@ package io.github.some_example_name;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -31,7 +33,7 @@ public class GameplayScreen implements Screen {
 
     ArrayList<Animal> animals;
 
-    private boolean racing = true;
+    private boolean racing = false;
 
     private BitmapFont defaultFont = new BitmapFont();
 
@@ -39,7 +41,13 @@ public class GameplayScreen implements Screen {
 
     private double endTime;
 
-    private double startTime = System.currentTimeMillis();
+    private double startTime;
+
+    private BitmapFont font1;
+
+    private boolean raceEnd;
+
+
     /*
      * runs one time, at the very beginning
      * all setup should happen here
@@ -71,6 +79,18 @@ public class GameplayScreen implements Screen {
         animals.add(new SnappingTurtle(0,160));
         animals.add(new Cheeta(0,240));
 
+        //load fonts
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Super Histories.ttf"));
+
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 32;
+
+
+        font1 = generator.generateFont(parameter);
+        generator.dispose();
+
+
+
     }
 
     /*
@@ -90,6 +110,22 @@ public class GameplayScreen implements Screen {
         //A.I.
         int count = 0;
 
+
+        if (!racing && !raceEnd && Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
+            racing = true;
+            startTime = System.currentTimeMillis();
+        }
+
+        if(raceEnd && Gdx.input.isKeyPressed(Input.Keys.ENTER)){
+            for (Animal animal : animals){
+                animal.setX(0);
+            }
+            startTime = System.currentTimeMillis();
+            racing = true;
+            raceEnd = false;
+        }
+
+
         if (racing) {
             for (Animal animal : animals) {
                 animal.act();
@@ -102,6 +138,7 @@ public class GameplayScreen implements Screen {
 
         if(count > 0){
             racing = false;
+            raceEnd = true;
             endTime = System.currentTimeMillis();
         }
 
@@ -113,17 +150,24 @@ public class GameplayScreen implements Screen {
 
         //all drawing of graphic MUST go between being/end
         spriteBatch.begin();
-        if(!racing){
-            defaultFont.draw(spriteBatch, "Winner: " + winner, 300, 300);
-            defaultFont.draw(spriteBatch, "Time: " + ((endTime-startTime)/1000.0) + " seconds", 200, 200);
-        }
+        if(!racing && raceEnd){
+            font1.draw(spriteBatch, "Winner: " + winner, 300, 300);
+            font1.draw(spriteBatch, "Time: " + ((endTime-startTime)/1000.0) + " seconds", 200, 200);
+        } else if(!racing){
+            font1.draw(spriteBatch, "Press Spacebar to begin race...", 400, 350);
+        } else {
+            font1.draw(spriteBatch, "Time: " + ((System.currentTimeMillis() - startTime) / 1000), 120, 120);}
 
-        defaultFont.draw(spriteBatch, "Time: " + ((System.currentTimeMillis() - startTime) / 1000), 400, 400);
+        font1.draw(spriteBatch, "Time: " + ((System.currentTimeMillis() - startTime) / 1000), 400, 400);
 
 
         for(Animal animal : animals){
             animal.draw(spriteBatch);
+
+
         }
+
+
 
 
         spriteBatch.end();
